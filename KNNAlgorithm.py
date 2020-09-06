@@ -33,7 +33,7 @@ class KNNAlgorithm():
             distances_list.append( (distance, row[label_column]))
         distances_list = sorted(distances_list)
         distances_list = distances_list[0:number_of_neighbors] # get the N nearest neighbots
-        
+
         predicted_class = self._get_most_frequent(distances_list) # calculate the most frequent neighbor
 
         if 'add_to_confusion_matrix' in options and options['add_to_confusion_matrix'] == True:
@@ -53,7 +53,7 @@ class KNNAlgorithm():
     def get_f_score(self, beta):
         base_value = 1+(beta ** 2)
         numerator = self.get_precision() * self.get_recall() 
-        denominator = (b**2 * self.get_precision()) + self.get_recall()
+        denominator = ( (beta**2) * self.get_precision() ) + self.get_recall()
         return base_value * (numerator/denominator)
 
     def _evaluate_to_confusion_matrix(self, options, predicted_class):
@@ -77,3 +77,15 @@ class KNNAlgorithm():
                 counter[label] = 1
 
         return max(counter.keys(), key=lambda key: counter[key])
+
+    def print_results(self, index, beta):
+        if index==0:
+            print("FoldTest/Iter,Accuracy,F-1Measure")
+        accuracy = self.get_accuracy()
+        f_score = self.get_f_score(beta)
+        print(f"{index},{accuracy},{f_score}")
+        self.false_positive = 0
+        self.false_negative = 0
+        self.true_negative = 0
+        self.true_negative = 0
+        return accuracy, f_score

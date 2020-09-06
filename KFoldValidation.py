@@ -4,16 +4,32 @@ import random
 class KFoldValidation():
     df = None
 
-    def send_sample_inference(self, options):
+    def train_with_kfold(self, options):
         algorithm = options['train_algorithm']
-        df = options['train_dataset']
-        model = algorithm.train(df)
+        self.df = options['train_dataset']
+        num_folds = options['num_folds']
+        label_column = options['label_column']
 
-        column_names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']
-        column_values = [1.0, 93.0, 70.0, 31.0, 0.0, 30.4, 0.315, 23.0]
-        inference_data = pd.Series(column_values, index = column_names)
-        predicted_class = model.predict(inference_data, options)
-        print(predicted_class)
+        model = algorithm.train(self.df)
+
+        acc_list = []
+        f_sc_list = []
+
+        folds = self._split_in_k_folds(num_folds, label_column)
+        for index, fold in enumerate(folds):
+            options['train_dataset'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
+            test_set = folds[index]
+            for _, row in test_set.iterrows():
+                options['correct_class'] = row[label_column]
+                target = model.predict(row.drop(label_column), options) # predict for each row
+            acc, f_s = model.print_results(index, 1)
+            acc_list.append(acc)
+            f_sc_list.append(f_s)
+        
+        ac_metric_mean, ac_metric_std = self._get_statistics(acc_list)
+        f_metric_mean, f_metric_std = self._get_statistics(f_sc_list)
+        print(f"Median,{ac_metric_mean},{f_metric_mean}")
+        print(f"StandardDeviation,{ac_metric_std},{f_metric_std}")
 
     def _split_in_k_folds(self, num_folds, label_column):
         """
@@ -41,10 +57,16 @@ class KFoldValidation():
         
         return [self.df.iloc[i] for i in folds] # return a list with dataframes for each fold
 
-    def _normalize_df(self):
-        """
-        using the formula
-        element - min   element / max element - min element
-        """
-        self.df = (self.df-self.df.min()) / (self.df.max()-self.df.min())
+    def _get_statistics(self, population):
+        population_sum = sum(population)
+        population_size = len(population)
 
+        mean = population_sum/population_size
+
+        result = 0
+        for i in population:
+            result += (i-mean)**2
+        result = result/population_size
+        standard_deviation = result**1/2
+
+        return mean, standard_deviation
