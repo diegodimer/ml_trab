@@ -10,13 +10,6 @@ def euclidean_distance(a, b):
         acc += (value - b[name]) ** 2
     return sqrt(acc)
 
-def normalize_df(self):
-    """
-    using the formula
-    element - min   element / max element - min element
-    """
-    return (df-df.min()) / (df.max()-df.min())
-
 
 df = pd.read_csv('diabetes.csv')
 df = normalize_df(df)
