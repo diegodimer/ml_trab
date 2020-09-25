@@ -7,21 +7,21 @@ Node = namedtuple('Nod', ['label', 'children'])
 
 class DecisionTree(BaseAlgorithm):
 
-    def _select_attribute(self, attributes_list, dataframe):
+    def _select_attribute(self, attributes_list, df):
         """
         Select the attribute to split the decision tree based on the concept of entropy
-        dataframe: the pandas dataframe 
+        df: the pandas dataframe 
         """
-        info_D = self._Entropy(dataframe)
+        entropy_all_data = self._entropy(df)
 
         best = 0
         for attr in attributes_list:
-            info_aD = 0
-            for value in dataframe[attr].unique():
-                dj = dataframe.loc[dataframe[attr] == value]
-                info_aD += len(dj)/len(dataframe)*self._Entropy(dj)
+            entropy_attribute = 0
+            for value in df[attr].unique():
+                df_attribute = df.loc[df[attr] == value]
+                entropy_attribute += len(df_attribute)/len(df)*self._entropy(df_attribute)
 
-            gain = info_D - info_aD
+            gain = entropy_all_data - entropy_attribute
 
             if gain > best:
                 best = gain
@@ -30,12 +30,12 @@ class DecisionTree(BaseAlgorithm):
 
 
     # auxiliar para _InfoGain
-    def _Entropy(self, df):
-        info_D = 0
-        for yClass in df[self.outcome].unique():
-            p_i = len(df.loc[ df[self.outcome] == yClass ])/len(df)
-            info_D += - p_i*math.log(p_i,2)
-        return info_D
+    def _entropy(self, df):
+        entropy = 0
+        for attr_class in df[self.outcome].unique():
+            p_i = len(df.loc[ df[self.outcome] == attr_class ])/len(df)
+            entropy += - p_i*math.log(p_i,2)
+        return entropy
 
         
     def train(self, options):
@@ -93,16 +93,3 @@ class DecisionTree(BaseAlgorithm):
         for child in tree.children:
             if child[1] == attribute:
                 return self.recursive_tree_search(data, child[0])
-
-
-if __name__ == '__main__':
-    options = {
-        'df': pd.read_csv("benchmark.csv", sep=';'),
-        'label_column': "Joga"
-    }
-    tr = DecisionTree()
-    model = tr.train(options)
-
-    inf_data = pd.Series(["Ensolarado", "Quente", "Normal", "Verdadeiro"], index=["Tempo", "Temperatura", "Umidade", "Ventoso"], name ="InferenceData")
-
-    print(model.predict(inf_data))
