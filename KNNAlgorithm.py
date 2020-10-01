@@ -4,7 +4,7 @@ class KNNAlgorithm():
     false_positive = 0
     false_negative = 0
 
-    def train(self, dataframe):
+    def train(self, options):
         """
         Knn Algorithm doesn't train a model. It calculates directly on the training data the 
         label for some entry.
