@@ -18,10 +18,7 @@ class DecisionTree():
         allAtt = list(df.columns) # get list of attributes
         allAtt.remove(outcome)
 
-        # mAtt = random.sample(allAtt, math.ceil(math.sqrt(len(allAtt)))) # select m random attributes
-        mAtt = allAtt
-
-        self.root = self._makeTree(df, "root", mAtt) # build decision tree
+        self.root = self._makeTree(df, "root", allAtt) # build decision tree
 
 
     '''
@@ -54,15 +51,17 @@ class DecisionTree():
         if df[self.outcome].nunique() == 1 or len(listAtt) == 0: 
             return Node(str(df[self.outcome].mode()[0]), parentValue)
 
-        newAttribute = self._InfoGain(df, listAtt) # selects best attribute
-
+        mAtt = random.sample(listAtt, math.ceil(math.sqrt(len(listAtt)))) # select m random attributes
+   
+        newAttribute = self._InfoGain(df, mAtt) # selects best attribute
+       
         listAtt.remove(newAttribute) # removes selected attribute from list
 
         newNode = Node(newAttribute, parentValue) #creates new node
 
         groups = df.groupby(df[newAttribute]) # splits data according to the selected attribute values 
         for name, obj in groups:
-            newNode.addChildren(self._makeTree(obj, str(name), listAtt)) # adds one children for each value
+            newNode.addChildren(self._makeTree(obj, str(name), listAtt.copy())) # adds one children for each value
 
         return newNode
 
@@ -80,8 +79,8 @@ class DecisionTree():
                 info_aD += len(dj)/len(df)*self._Entropy(dj)
 
             gain = info_D - info_aD
-
-            if gain > best:
+            
+            if gain >= best:
                 best = gain
                 chosen = attr
         return chosen
@@ -151,4 +150,3 @@ if __name__ == '__main__':
     series = dataframe.loc[3]
 
     print(dt.predict(series))
-
