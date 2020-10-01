@@ -17,13 +17,13 @@ class KNNAlgorithm(BaseAlgorithm):
         """
         inference_data = pandas.core.series.Series, should be the row (without the label) to be predicted by the algorithm
         options = dictionary, contains the inference options, for Knn algorithm it's necessary to have:
-            * train_dataset = the dataframe used for the inference,
+            * df = the dataframe used for the inference,
             * label_column = the name of the column to be predicted
             * distance_function = the function used to calculate the distance (euclidean or manhattan)
             * number_of_neighbors = number of n neighbors to calculate the label
         """
 
-        df = options['train_dataset']
+        df = options['df']
         label_column = options['label_column']
         distance_function = options['distance_function']
         number_of_neighbors = options['number_of_neighbors']

@@ -3,28 +3,34 @@ import random
 
 class KFoldValidation():
     df = None
+    true_positive = 0
+    true_negative = 0
+    false_positive = 0
+    false_negative = 0
 
     def train_with_kfold(self, options):
         algorithm = options['train_algorithm']
-        self.df = options['train_dataset']
+        self.df = options['df']
         num_folds = options['num_folds']
         label_column = options['label_column']
+        beta = options['beta']
+        positive_class = options['positive_class']
 
-        model = algorithm.train(self.df)
+        model = algorithm.train(options)
 
         acc_list = []
         f_sc_list = []
 
         folds = self._split_in_k_folds(num_folds, label_column)
-        for index, fold in enumerate(folds):
+        for index, _ in enumerate(folds):
             options['train_dataset'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
             test_set = folds[index]
             for _, row in test_set.iterrows():
-                options['correct_class'] = row[label_column]
-                target = model.predict(row.drop(label_column), options) # predict for each row
-            acc, f_s = model.print_results(index, 1)
-            acc_list.append(acc)
-            f_sc_list.append(f_s)
+                correct = row[label_column] # the predict function stores in the confusion matrix
+                predicted = model.predict(row.drop(label_column), options) # predict for each row
+                self._evaluate_to_confusion_matrix(correct, predicted, positive_class)
+            acc_list.append(self._get_accuracy())
+            f_sc_list.append(self._get_f_score(beta))
         
         ac_metric_mean, ac_metric_std = self._get_statistics(acc_list)
         f_metric_mean, f_metric_std = self._get_statistics(f_sc_list)
@@ -70,3 +76,31 @@ class KFoldValidation():
         standard_deviation = result**1/2
 
         return mean, standard_deviation
+
+
+    def _evaluate_to_confusion_matrix(self, correct_class, predicted_class, positive_class):
+        if predicted_class == correct_class:
+            if predicted_class == positive_class:
+                self.true_positive += 1
+            else:
+                self.true_negative += 1
+        else:
+            if predicted_class == positive_class:
+                self.false_positive += 1
+            else:
+                self.false_negative += 1
+
+    def _get_accuracy(self):
+        return (self.true_positive + self.true_negative) / (self.true_negative + self.false_negative + self.true_positive + self.false_positive)
+
+    def _get_recall(self):
+        return self.true_positive / (self.true_positive + self.false_negative)
+
+    def _get_precision(self):
+        return self.true_positive / (self.true_positive + self.false_positive)
+
+    def _get_f_score(self, beta):
+        base_value = 1+(beta ** 2)
+        numerator = self._get_precision() * self._get_recall() 
+        denominator = ( (beta**2) * self._get_precision() ) + self._get_recall()
+        return base_value * (numerator/denominator)
