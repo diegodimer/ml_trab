@@ -1,4 +1,6 @@
-class KNNAlgorithm():
+from base import BaseAlgorithm
+
+class KNNAlgorithm(BaseAlgorithm):
     true_positive = 0
     true_negative = 0
     false_positive = 0

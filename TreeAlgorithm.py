@@ -63,7 +63,7 @@ class DecisionTree():
         newNode = Node(newAttribute, parentValue) #creates new node
 
         groups = df.groupby(df[newAttribute]) # splits data according to the selected attribute values 
-        for name, obj in groups.__iter__():
+        for name, obj in groups:
             newNode.addChildren(self._makeTree(obj, str(name), listAtt)) # adds one children for each value
 
         return newNode
