@@ -15,6 +15,7 @@ class DecisionTree(BaseAlgorithm):
         entropy_all_data = self._entropy(df)
 
         best = 0
+
         for attr in attributes_list:
             entropy_attribute = 0
             for value in df[attr].unique():
@@ -23,7 +24,7 @@ class DecisionTree(BaseAlgorithm):
 
             gain = entropy_all_data - entropy_attribute
 
-            if gain > best:
+            if gain >= best:
                 best = gain
                 chosen = attr
         return chosen

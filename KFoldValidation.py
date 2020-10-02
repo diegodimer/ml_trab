@@ -9,6 +9,13 @@ class KFoldValidation():
     false_negative = 0
 
     def train_with_kfold(self, options):
+        """
+        Training using kfoldvalidation
+        options['df']: pandasDataFrame, the training dataframe
+        options['train_algorithm']: the training algorithm (class)
+        options['num_folds']: number of folds
+        + all options necessary for the training algorithm
+        """
         algorithm = options['train_algorithm']
         self.df = options['df']
         num_folds = options['num_folds']
