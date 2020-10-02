@@ -16,19 +16,22 @@ class KFoldValidation():
         beta = options['beta']
         positive_class = options['positive_class']
 
-        model = algorithm.train(options)
-
         acc_list = []
         f_sc_list = []
 
         folds = self._split_in_k_folds(num_folds, label_column)
+
         for index, _ in enumerate(folds):
-            options['train_dataset'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
+
+            options['df'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
+            model = algorithm.train(options)
             test_set = folds[index]
+
             for _, row in test_set.iterrows():
                 correct = row[label_column] # the predict function stores in the confusion matrix
-                predicted = model.predict(row.drop(label_column), options) # predict for each row
+                predicted = model.predict(row.drop(label_column)) # predict for each row
                 self._evaluate_to_confusion_matrix(correct, predicted, positive_class)
+
             acc_list.append(self._get_accuracy())
             f_sc_list.append(self._get_f_score(beta))
         
