@@ -40,6 +40,11 @@ class DecisionTree(BaseAlgorithm):
 
         
     def train(self, options):
+        """
+        Train a decision tree
+        options['df']: dataframe
+        options['label_colum']: name of the attribute to be predicted
+        """
         key_column =  options['label_column'] # column with the class name
         self.outcome = key_column
         df = options['df']
