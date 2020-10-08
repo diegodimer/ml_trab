@@ -11,14 +11,16 @@ class DecisionTree():
         df: training dataFrame
         outcome: name of attribute we want to predict
     '''
-    def train(self, df, outcome):
-
-        self.outcome = outcome
+    def train(self, options):
+        df = options['df']
+        self.outcome = options['label_column']
 
         allAtt = list(df.columns) # get list of attributes
         allAtt.remove(outcome)
 
         self.root = self._makeTree(df, "root", allAtt) # build decision tree
+
+        return root
 
 
     '''

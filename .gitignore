@@ -1,3 +1,5 @@
 .vscode
 diabetes.csv
 testdata.csv
+__pycache__
+
