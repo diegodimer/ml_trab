@@ -2,6 +2,7 @@ from base import BaseAlgorithm
 from collections import namedtuple
 import pandas as pd
 import math
+import random
 
 Node = namedtuple('Nod', ['label', 'children'])
 
@@ -14,8 +15,10 @@ class DecisionTree(BaseAlgorithm):
         """
         entropy_all_data = self._entropy(df)
 
+        mAtt = random.sample(attributes_list, math.ceil(math.sqrt(len(attributes_list)))) # select m random attributes
+       
         best = 0
-        for attr in attributes_list:
+        for attr in mAtt:
             entropy_attribute = 0
             for value in df[attr].unique():
                 df_attribute = df.loc[df[attr] == value]
@@ -23,7 +26,7 @@ class DecisionTree(BaseAlgorithm):
 
             gain = entropy_all_data - entropy_attribute
 
-            if gain > best:
+            if gain >= best:
                 best = gain
                 chosen = attr
         return chosen
@@ -70,7 +73,7 @@ class DecisionTree(BaseAlgorithm):
                 return node
             else:
                 self._add_children(father = node,
-                                child = self._recursive_tree_generator(new_df, label_column, L),
+                                child = self._recursive_tree_generator(new_df, label_column, L.copy()),
                                 transition = distinc_value)
         return node
 
