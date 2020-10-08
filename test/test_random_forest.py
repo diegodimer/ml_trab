@@ -16,15 +16,17 @@ class TestRandomForest(unittest.TestCase):
         inf_data = pd.Series(["Ensolarado", "Quente", "Normal", "Verdadeiro"], index=["Tempo", "Temperatura", "Umidade", "Ventoso"], name ="InferenceData")
         self.assertEqual(model.predict(inf_data), 'Sim')
     
-    # def test_all_file(self):
-    #     options = {
-    #         'df': pd.read_csv("benchmark.csv", sep=';'),
-    #         'label_column': "Joga"
-    #     }
-    #     tr = RandomForest()
-    #     model = tr.train(options)
+    def test_all_file(self):
+        options = {
+            'df': pd.read_csv("benchmark.csv", sep=';'),
+            'label_column': "Joga",
+            'n_trees': 5,
+            'bootstrap_size': 10
+        }
+        tr = RandomForest()
+        model = tr.train(options)
 
-    #     for _, row in options['df'].iterrows():
-    #         target_label = row["Joga"]
-    #         predicted = model.predict(row.drop("Joga"))
-    #         self.assertEqual(target_label, predicted)
+        for _, row in options['df'].iterrows():
+            target_label = row["Joga"]
+            predicted = model.predict(row.drop("Joga"))
+            self.assertEqual(target_label, predicted)

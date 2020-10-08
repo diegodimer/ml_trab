@@ -18,6 +18,7 @@ class DecisionTree(BaseAlgorithm):
         mAtt = random.sample(attributes_list, math.ceil(math.sqrt(len(attributes_list)))) # select m random attributes
        
         best = 0
+        
         for attr in mAtt:
             entropy_attribute = 0
             for value in df[attr].unique():
@@ -42,6 +43,11 @@ class DecisionTree(BaseAlgorithm):
 
         
     def train(self, options):
+        """
+        Train a decision tree
+        options['df']: dataframe
+        options['label_colum']: name of the attribute to be predicted
+        """
         key_column =  options['label_column'] # column with the class name
         self.outcome = key_column
         df = options['df']

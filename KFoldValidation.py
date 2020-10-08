@@ -5,31 +5,38 @@ class KFoldValidation():
     df = None
 
     def train_with_kfold(self, options):
+        """
+        Training using kfoldvalidation
+        options['df']: pandasDataFrame, the training dataframe
+        options['train_algorithm']: the training algorithm (class)
+        options['num_folds']: number of folds
+        + all options necessary for the training algorithm
+        """
         algorithm = options['train_algorithm']
-        self.df = options['train_dataset']
+        self.df = options['df']
         num_folds = options['num_folds']
         label_column = options['label_column']
-
-        model = algorithm.train(self.df)
 
         acc_list = []
         f_sc_list = []
 
         folds = self._split_in_k_folds(num_folds, label_column)
-        for index, fold in enumerate(folds):
-            options['train_dataset'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
+        print("index,score,test_fold_size,accuracy")
+        for index, _ in enumerate(folds):
+
+            options['df'] = pd.concat(folds[0:index]+folds[index+1:]) # train is all but the test concatenated
+            model = algorithm.train(options)
             test_set = folds[index]
+            test_set_size = len(test_set.index)
+
+            score = 0
             for _, row in test_set.iterrows():
-                options['correct_class'] = row[label_column]
-                target = model.predict(row.drop(label_column), options) # predict for each row
-            acc, f_s = model.print_results(index, 1)
-            acc_list.append(acc)
-            f_sc_list.append(f_s)
-        
-        ac_metric_mean, ac_metric_std = self._get_statistics(acc_list)
-        f_metric_mean, f_metric_std = self._get_statistics(f_sc_list)
-        print(f"Median,{ac_metric_mean},{f_metric_mean}")
-        print(f"StandardDeviation,{ac_metric_std},{f_metric_std}")
+                correct = row[label_column]
+                predicted = model.predict(row.drop(label_column)) # predict for each row
+                if predicted == correct:
+                    score += 1
+            print(f"{index},{score},{test_set_size},{score/test_set_size}")
+
 
     def _split_in_k_folds(self, num_folds, label_column):
         """
@@ -56,17 +63,3 @@ class KFoldValidation():
                 current = (j+1)*range_in_fold
         
         return [self.df.iloc[i] for i in folds] # return a list with dataframes for each fold
-
-    def _get_statistics(self, population):
-        population_sum = sum(population)
-        population_size = len(population)
-
-        mean = population_sum/population_size
-
-        result = 0
-        for i in population:
-            result += (i-mean)**2
-        result = result/population_size
-        standard_deviation = result**1/2
-
-        return mean, standard_deviation
