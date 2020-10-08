@@ -32,4 +32,6 @@ def get_test_set_from_bootstrap(df, bootstrap):
 def discretize_df(df):
     for column in df:
         if pd.api.types.is_numeric_dtype(df[column]):
-            df[column] = df[column] > df[column].mean()
+            mean = df[column].mean()
+            df[column] = df[column] > mean
+    return mean

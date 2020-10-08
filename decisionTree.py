@@ -4,7 +4,7 @@ import pandas as pd
 import math
 import random
 
-Node = namedtuple('Nod', ['label', 'children'])
+Node = namedtuple('Node', ['label', 'children'])
 
 class DecisionTree(BaseAlgorithm):
 
@@ -21,19 +21,28 @@ class DecisionTree(BaseAlgorithm):
         
         for attr in mAtt:
             entropy_attribute = 0
-            for value in df[attr].unique():
-                df_attribute = df.loc[df[attr] == value]
-                entropy_attribute += len(df_attribute)/len(df)*self._entropy(df_attribute)
+
+            ## atributos numéricos: discretiza para acima da média ou abaixo da média
+            if pd.api.types.is_numeric_dtype(df[attr]):
+                mean = df[attr].mean()
+                df_attribute_below_average = df.loc[df[attr] < mean]
+                df_attribute_above_average = df.loc[df[attr] >= mean]
+                entropy_attribute = len(df_attribute_below_average)/len(df)*self._entropy(df_attribute_below_average) + \
+                                    len(df_attribute_above_average)/len(df)*self._entropy(df_attribute_above_average)
+
+            else:
+                for value in df[attr].unique():
+                    df_attribute = df.loc[df[attr] == value]
+                    entropy_attribute += len(df_attribute)/len(df)*self._entropy(df_attribute)
 
             gain = entropy_all_data - entropy_attribute
 
             if gain >= best:
                 best = gain
                 chosen = attr
+
         return chosen
 
-
-    # auxiliar para _InfoGain
     def _entropy(self, df):
         entropy = 0
         for attr_class in df[self.outcome].unique():
@@ -43,12 +52,7 @@ class DecisionTree(BaseAlgorithm):
 
         
     def train(self, options):
-        """
-        Train a decision tree
-        options['df']: dataframe
-        options['label_colum']: name of the attribute to be predicted
-        """
-        key_column =  options['label_column'] # column with the class name
+        key_column =  options['label_column']
         self.outcome = key_column
         df = options['df']
         L = df.columns.to_list()
@@ -73,7 +77,8 @@ class DecisionTree(BaseAlgorithm):
         chosen_attr = self._select_attribute(L, df)
         node = self._new_node(chosen_attr)
         L.remove(chosen_attr)
-        for distinc_value, new_df in df.groupby(df[chosen_attr]): #pra cada valor distinto do atributo escolhido
+
+        for distinc_value, new_df in self._group_df_by_attribute(df, chosen_attr):
             if len(new_df.index) == 0:
                 node = self._new_node(df[label_column].mode()[0])
                 return node
@@ -100,5 +105,22 @@ class DecisionTree(BaseAlgorithm):
         attribute = data[tree.label]
 
         for child in tree.children:
-            if child[1] == attribute:
-                return self.recursive_tree_search(data, child[0])
+            if type(child[1]) is str:
+                if child[1] == attribute:
+                    return self.recursive_tree_search(data, child[0])
+            else:
+                if child[1](attribute):
+                    return self.recursive_tree_search(data, child[0])
+
+    def _group_df_by_attribute(self, df, attr):
+        group_list = []
+        if pd.api.types.is_numeric_dtype(df[attr]):
+            mean = df[attr].mean()
+            group_list = [
+                (lambda n: n<mean, df.loc[df[attr] < mean]), # se o atributo é numérico, usa uma função lambda para retornar true/false
+                (lambda n: n>=mean, df.loc[df[attr] >= mean]),
+            ]
+        else:
+            return df.groupby(df[attr])
+
+        return group_list
