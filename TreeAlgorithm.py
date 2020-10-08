@@ -53,15 +53,15 @@ class DecisionTree():
         if df[self.outcome].nunique() == 1 or len(listAtt) == 0: 
             return Node(str(df[self.outcome].mode()[0]), parentValue)
 
-        mAtt = random.sample(listAtt, math.ceil(math.sqrt(len(listAtt)))) # select m random attributes
+        m_attributes = random.sample(listAtt, math.ceil(math.sqrt(len(listAtt)))) # select m random attributes
    
-        newAttribute = self._InfoGain(df, mAtt) # selects best attribute
+        new_attribute = self._InfoGain(df, m_attributes) # selects best attribute
        
-        listAtt.remove(newAttribute) # removes selected attribute from list
+        listAtt.remove(new_attribute) # removes selected attribute from list
 
-        newNode = Node(newAttribute, parentValue) #creates new node
+        newNode = Node(new_attribute, parentValue) #creates new node
 
-        groups = df.groupby(df[newAttribute]) # splits data according to the selected attribute values 
+        groups = df.groupby(df[new_attribute]) # splits data according to the selected attribute values 
         for name, obj in groups:
             newNode.addChildren(self._makeTree(obj, str(name), listAtt.copy())) # adds one children for each value
 
