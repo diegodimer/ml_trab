@@ -4,7 +4,7 @@ import pandas as pd
 import math
 import random
 
-Node = namedtuple('Nod', ['label', 'children'])
+Node = namedtuple('Node', ['label', 'children'])
 
 class DecisionTree(BaseAlgorithm):
 
