@@ -1,17 +1,19 @@
 from utils import get_bootstrap, get_test_set_from_bootstrap, normalize_df
 import pandas as pd
 from decisionTree import DecisionTree
+from base import BaseAlgorithm
 
-class RandomForest(): #to-do: add base
+class RandomForest(BaseAlgorithm): #to-do: add base
 
     ensemble = []
 
     def train(self, options):
         """
+        train a random forest, using n_trees decision trees
         options['df']: pandas dataframe
         options['n_trees']: number of trees
         options['label_column']: label column to be predicted
-        options['bootstrap_size']: the size of the bootstrap, entries not used in the bootstrap will be used for testing
+        options['bootstrap_size']: the size of the bootstrap, entries not used in the bootstrap will be ignored
         """
         num_trees = options['n_trees']
         df = options['df']

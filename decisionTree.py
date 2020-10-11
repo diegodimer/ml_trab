@@ -8,6 +8,25 @@ Node = namedtuple('Node', ['label', 'children'])
 
 class DecisionTree(BaseAlgorithm):
 
+    def train(self, options):
+        """
+        Train a decision tree
+        options['df']: pandas dataframe
+        options['label_column']: label column to be predicted
+        """
+        key_column =  options['label_column']
+        self.outcome = key_column
+        df = options['df']
+        L = df.columns.to_list()
+
+        L.remove(key_column)
+        self.tree = self._recursive_tree_generator(options['df'], key_column, L)
+
+        return self
+
+    def predict(self, inference_data):
+        return self._recursive_tree_search(inference_data, self.tree)
+
     def _select_attribute(self, attributes_list, df):
         """
         Select the attribute to split the decision tree based on the concept of entropy
@@ -16,7 +35,6 @@ class DecisionTree(BaseAlgorithm):
         entropy_all_data = self._entropy(df)
 
         mAtt = random.sample(attributes_list, math.ceil(math.sqrt(len(attributes_list)))) # select m random attributes
-       
         best = 0
         
         for attr in mAtt:
@@ -40,7 +58,6 @@ class DecisionTree(BaseAlgorithm):
             if gain >= best:
                 best = gain
                 chosen = attr
-
         return chosen
 
     def _entropy(self, df):
@@ -49,18 +66,6 @@ class DecisionTree(BaseAlgorithm):
             p_i = len(df.loc[ df[self.outcome] == attr_class ])/len(df)
             entropy += - p_i*math.log(p_i,2)
         return entropy
-
-        
-    def train(self, options):
-        key_column =  options['label_column']
-        self.outcome = key_column
-        df = options['df']
-        L = df.columns.to_list()
-
-        L.remove(key_column)
-        self.tree = self._recursive_tree_generator(options['df'], key_column, L)
-
-        return self
 
     def _recursive_tree_generator(self, df, label_column, L):
         # df = dataframe
@@ -94,11 +99,7 @@ class DecisionTree(BaseAlgorithm):
     def _add_children(self, father=None, child=None, transition=None):
         father.children.append( [child, transition] )
 
-    def predict(self, inference_data):
-        return self.recursive_tree_search(inference_data, self.tree)
-
-
-    def recursive_tree_search(self, data, tree):
+    def _recursive_tree_search(self, data, tree):
         if len(tree.children) == 0:
             return tree.label
 
@@ -107,10 +108,10 @@ class DecisionTree(BaseAlgorithm):
         for child in tree.children:
             if type(child[1]) is str:
                 if child[1] == attribute:
-                    return self.recursive_tree_search(data, child[0])
+                    return self._recursive_tree_search(data, child[0])
             else:
                 if child[1](attribute):
-                    return self.recursive_tree_search(data, child[0])
+                    return self._recursive_tree_search(data, child[0])
 
     def _group_df_by_attribute(self, df, attr):
         group_list = []
