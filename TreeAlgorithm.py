@@ -16,11 +16,11 @@ class DecisionTree():
         self.outcome = options['label_column']
 
         allAtt = list(df.columns) # get list of attributes
-        allAtt.remove(outcome)
+        allAtt.remove(self.outcome)
 
         self.root = self._makeTree(df, "root", allAtt) # build decision tree
 
-        return root
+        return self
 
 
     '''

@@ -23,11 +23,9 @@ class RandomForest(BaseAlgorithm): #to-do: add base
             'label_column': options['label_column']
         }
         for i in range(num_trees):
-            tree_options.update({
-                'df': get_bootstrap(df, bootstrap_size)
-            })
+            tree_options['df'] = get_bootstrap(df, bootstrap_size)
             new_tree = DecisionTree()
-            self.ensemble.append(new_tree.train(options))
+            self.ensemble.append(new_tree.train(tree_options))
 
         return self
 
