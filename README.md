@@ -2,7 +2,7 @@
 
 # Random Forest
 
-O algoritmo foi desenvolvido em `Python`, na versão `3.6.9`. Para executar, é necessário também o package `pandas`, na versão `1.1.1`.
+O algoritmo foi desenvolvido em `Python`, na versão `3.6.9`. Para executar, é necessário instalar as dependências no arquivo `requirements.txt`, é possível fazê-lo com o comando `pip3 install -r requirements.txt`.
 #### Arquivo `main.py`
 O arquivo `main.py` contém um exemplo da execução do algoritmo para florestas aleatórias utilizando _cross validation_. O dicionário `options` contém todos os parâmetros necessários tanto para execução do algoritmo quanto para a _KFoldValidation_. Ele pode ser executado por linha de comando simplesmente chamando `python3 main.py`.
 

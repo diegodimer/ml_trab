@@ -1,31 +1,23 @@
 from KFoldValidation import KFoldValidation
 from randomForest import RandomForest
-from decisionTree import DecisionTree
 import pandas as pd
-from math import sqrt
-from copy import deepcopy
+import random
+import numpy as np
 
-df = pd.read_csv('datasets/wine-recognition.tsv', sep='\t')
-original_df = deepcopy(df)
+seed = 5
+np.random.seed(seed)
+random.seed(seed)
+
+df = pd.read_csv('datasets/iris.data')
+
 options = {
     'train_algorithm' : RandomForest(),
     'df' : df,
-    'label_column' : 'target',
+    'label_column' : 'Y',
     'num_folds' : 5,
-    'n_trees': 10,
+    'n_trees': 15,
     'bootstrap_size': 2,
     }
+
 runner = KFoldValidation()
-# runner.train_with_kfold(options)
-
-l = [1, 5, 10, 15, 25, 50]
-acc = []
-for i in l:
-    options.update({"n_trees": i, "df": df})
-    acc.append(runner.train_with_kfold(options))
-
-import matplotlib.pyplot as plt
-plt.plot(l, acc)
-plt.ylabel("Acurácia média")
-plt.xlabel("n_trees")
-plt.savefig('n_trees.png')
+runner.train_with_kfold(options)
